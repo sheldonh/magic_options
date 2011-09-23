@@ -43,10 +43,12 @@ Professor.new :does_not_take => :anything
 Obtaining
 ---------
 
-[https://github.com/sheldonh/magic_options]
+<https://github.com/sheldonh/magic_options>
 
 Credits
 -------
 
-Pair programmed with [@rorymckinley][http://twitter.com/#!/rorymckinley]
+Pair programmed with [@rorymckinley][c1]
+
+[c1]: http://twitter.com/#!/rorymckinley
 
