@@ -12,7 +12,7 @@ describe "MagicOptions" do
 
     it "sets instance variables for all options" do
       object = Klazz.new(:color => "green")
-      object.instance_variables.should include("@color")
+      object.should be_instance_variable_defined(:@color)
       object.instance_variable_get(:@color).should == "green"
     end
 
