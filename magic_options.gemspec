@@ -8,7 +8,7 @@ Gem::Specification.new do |s|
   s.authors     = ["Sheldon Hearn", "Rory McKinley"]
   s.email       = ["sheldonh@starjuice.net", "rorymckinley@gmail.com"]
   s.homepage    = "http://github.com/sheldonh/magic_options"
-  s.summary     = "Module to provide initialize with magic options"
+  s.summary     = "Ruby module to provide initialize with magic options"
 
   s.rubyforge_project = "magic_options"
 
