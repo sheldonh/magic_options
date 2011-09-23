@@ -24,7 +24,7 @@ class Gullible
 end
 
 Gullible.new :accepts => "anything"
- => #<Whore:0x7f77e407fdb0 @accepts="anything">
+ => #<Gullible:0x7f77e407fdb0 @accepts="anything">
 
 class Professor
 
