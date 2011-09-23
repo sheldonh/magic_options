@@ -12,6 +12,16 @@ Example
 require 'rubygems'
 require 'magic_options'
 
+class Cow
+
+  include MagicOptions
+
+  magic_options :accessors
+
+  attr_accessor :color, :gender
+
+end
+
 Cow.new :color => "brown", :gender => "female"
  => #<Cow:0x7f77e409a6d8 @gender="female", @color="brown">
 Cow.new :color => "brown", :gender => "female", :wheels => 4
