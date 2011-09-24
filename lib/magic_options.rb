@@ -2,10 +2,10 @@ require "magic_options/version"
 
 module MagicOptions
 
-  def initialize(options = {})
+  def magic_options(options, config = {})
+    magic_options_validate(options, config)
     options.each do |option, value|
-      magic_options_validate(option)
-      instance_variable_set "@#{option}".to_sym, value
+      instance_variable_set "@#{option}", value
     end
   end
 
@@ -25,14 +25,18 @@ module MagicOptions
 
 private
 
-  def magic_options_validate(option)
-    return unless allowed = self.class.magic_options_allowed
-    if allowed[0] == :accessors
-      return if respond_to?(option)
-    else
-      return if allowed.include?(option)
+  def magic_options_validate(options, config)
+    return if config.empty?
+    if only = [config[:only], config[:require]].flatten.compact
+      if unknown = options.keys.detect { |option| !only.include?(option) }
+        raise ArgumentError, "Unknown option #{unknown} in new #{self.class}"
+      end
     end
-    raise ArgumentError, "Unknown option #{option} in new #{self.class}"
+    if required = [config[:require]].flatten.compact
+      if missing = required.detect { |requirement| !options.keys.include?(requirement) }
+        raise ArgumentError, "Missing option #{missing} in new #{self.class}"
+      end
+    end
   end
 
 end
