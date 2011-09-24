@@ -93,15 +93,15 @@ MagicOptions#magic_options(options, config = {})
       Then Cow.new(:color => :brown)
         raises an ArgumentError
         reports the offending class and the missing option
-
-MagicOptions::ClassMethods#magic_initialize(config = {}) creates an
-initialize method that looks like this:
 ```
 
+MagicOptions::ClassMethods#magic_initialize(config = {}) creates an
+initialize method that works like this:
+
 ```ruby
-        def initialize(options = {})
-	  magic_options(options, config)
-	end
+def initialize(options = {})
+  magic_options(options, config)
+end
 ```
 
 Obtaining
