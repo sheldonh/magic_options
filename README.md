@@ -65,6 +65,7 @@ Documentation
 Working code first.  For now, here are the specs for the magic_options
 method:
 
+```
 MagicOptions#magic_options(options, config = {})
   Given class Cow mixes in MagicOptions
     When Cow#initialize(options) calls magic_options(options)
@@ -95,6 +96,7 @@ MagicOptions#magic_options(options, config = {})
 
 MagicOptions::ClassMethods#magic_initialize(config = {}) creates an
 initialize method that looks like this:
+```
 
 ```ruby
         def initialize(options = {})
