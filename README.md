@@ -6,6 +6,10 @@ an options hash into an object's instance variables.  Each key is taken
 as the name of an instance variable, to which the associated value is
 assigned.
 
+This is version 1.0.0.  It is not backward compatible with previous
+versions at all.  This version will be uploaded to rubygems.org within
+the next few days.
+
 Examples
 --------
 
