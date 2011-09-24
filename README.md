@@ -1,22 +1,34 @@
 magic_options
 -------------
 
-MagicOptions is a ruby module that provides an initialize method that takes an
-optional hash of options.  Each key is taken as the name of an instance
-variable, to which the associated value is assigned.
+MagicOptions is a ruby module that provides mechanisms for splatting
+an options hash into an object's instance variables.  Each key is taken
+as the name of an instance variable, to which the associated value is
+assigned.
 
-Example
--------
+Examples
+--------
 
 ```ruby
 require 'rubygems'
 require 'magic_options'
 
+class Gullible
+
+  include MagicOptions
+
+  magic_initialize
+
+end
+
+Gullible.new :accepts => "anything"
+ => #<Gullible:0x7f77e407fdb0 @accepts="anything">
+
 class Cow
 
   include MagicOptions
 
-  magic_options :accessors
+  magic_initialize :only => :respond_to?
 
   attr_accessor :color, :gender
 
@@ -27,20 +39,13 @@ Cow.new :color => "brown", :gender => "female"
 Cow.new :color => "brown", :gender => "female", :wheels => 4
  => ArgumentError: Unknown option wheels for new Cow
 
-class Gullible
-
-  include MagicOptions
-
-end
-
-Gullible.new :accepts => "anything"
- => #<Gullible:0x7f77e407fdb0 @accepts="anything">
-
 class Professor
 
   include MagicOptions
 
-  magic_options :iq, :hair_style
+  def initialize(name, options = {})
+    magic_options options, :only => [:iq, :hairstyle]
+  end
 
 end
 
@@ -48,6 +53,49 @@ Professor.new :hair_style => :einsteinian
  => #<Professor:0x7f77e406d980 @hair_style=:einsteinian>
 Professor.new :does_not_take => :anything
  => ArgumentError: Unknown option does_not_take for new Professor
+```
+
+Documentation
+-------------
+
+Working code first.  For now, here are the specs for the magic_options
+method:
+
+MagicOptions#magic_options(options, config = {})
+  Given class Cow mixes in MagicOptions
+    When Cow#initialize(options) calls magic_options(options)
+      Then Cow.new(:name => 'Daisy', :color => :brown)
+        sets @name to 'Daisy'
+        sets @color to :brown
+    When Cow#initialize(options) calls magic_options(options, :only => [:name, :color])
+      Then Cow.new(:name => 'Daisy', :color => :brown)
+        sets @name to 'Daisy'
+        sets @color to :brown
+      Then Cow.new(:name => 'Daisy', :gender => :female)
+        raises an ArgumentError
+        reports the offending class and the unknown option
+    When Cow#initialize(options) calls magic_options(options, :require => :name)
+      Then Cow.new(:name => 'Daisy', :color => :brown)
+        sets @name to 'Daisy'
+        sets @color to :brown
+      Then Cow.new(:color => :brown)
+        raises an ArgumentError
+        reports the offending class and the missing option
+    When Cow#initialize(options) calls magic_options(options, :only => :color, :require => :name)
+      Then Cow.new(:name => 'Daisy', :color => :brown)
+        sets @name to 'Daisy'
+        sets @color to :brown
+      Then Cow.new(:color => :brown)
+        raises an ArgumentError
+        reports the offending class and the missing option
+
+MagicOptions::ClassMethods#magic_initialize(config = {}) creates an
+initialize method that looks like this:
+
+```ruby
+        def initialize(options = {})
+	  magic_options(options, config)
+	end
 ```
 
 Obtaining
