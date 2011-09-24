@@ -15,10 +15,15 @@ module MagicOptions
 
   module ClassMethods
 
-    attr_accessor :magic_options_allowed
+    attr_accessor :magic_options_config
 
-    def magic_options(*allowed)
-      self.magic_options_allowed = allowed
+    def magic_initialize(config = {})
+      self.magic_options_config = config
+      class_eval %{
+        def initialize(options = {})
+          magic_options(options, self.class.magic_options_config)
+        end
+      }
     end
 
   end
