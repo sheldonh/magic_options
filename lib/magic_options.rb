@@ -31,13 +31,17 @@ module MagicOptions
 private
 
   def magic_options_validate(options, config)
-    return if config.empty?
-    if only = [config[:only], config[:require]].flatten.compact
+    if config[:only] == :respond_to?
+      if unknown = options.keys.detect { |option| !respond_to?(option) }
+        raise ArgumentError, "Unknown option #{unknown} in new #{self.class}"
+      end
+    elsif config[:only]
+      only = [config[:only], config[:require]].flatten.compact
       if unknown = options.keys.detect { |option| !only.include?(option) }
         raise ArgumentError, "Unknown option #{unknown} in new #{self.class}"
       end
     end
-    if required = [config[:require]].flatten.compact
+    if (required = [config[:require]].flatten.compact).size > 0
       if missing = required.detect { |requirement| !options.keys.include?(requirement) }
         raise ArgumentError, "Missing option #{missing} in new #{self.class}"
       end

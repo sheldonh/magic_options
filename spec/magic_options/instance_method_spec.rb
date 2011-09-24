@@ -4,19 +4,23 @@ describe "MagicOptions#magic_options" do
 
   context "Given class Cow mixes in MagicOptions" do
 
-    require 'magic_options'
-    class Cow
-      include MagicOptions
+    before(:each) do
+      require 'magic_options'
+      class Cow
+        include MagicOptions
+      end
     end
 
     context "When Cow#initialize(options) calls magic_options(options)" do
 
-      class Cow
-        def initialize(options = {})
-          magic_options options
+      before(:each) do
+        class Cow
+          def initialize(options = {})
+            magic_options options
+          end
         end
       end
-      
+
       context "Then Cow.new(:name => 'Daisy', :color => :brown)" do
 
         before(:each) do
@@ -37,9 +41,11 @@ describe "MagicOptions#magic_options" do
 
     context "When Cow#initialize(options) calls magic_options(options, :only => [:name, :color])" do
 
-      class Cow
-        def initialize(options)
-          magic_options(options, :only => [:name, :color])
+      before(:each) do
+        class Cow
+          def initialize(options)
+            magic_options(options, :only => [:name, :color])
+          end
         end
       end
 
@@ -79,9 +85,11 @@ describe "MagicOptions#magic_options" do
 
     context "When Cow#initialize(options) calls magic_options(options, :require => :name)" do
 
-      class Cow
-        def initialize(options)
-          magic_options(options, :require => :name)
+      before(:each) do
+        class Cow
+          def initialize(options)
+            magic_options(options, :require => :name)
+          end
         end
       end
 
@@ -116,9 +124,11 @@ describe "MagicOptions#magic_options" do
 
     context "When Cow#initialize(options) calls magic_options(options, :only => :color, :require => :name)" do
 
-      class Cow
-        def initialize(options)
-          magic_options(options, :only => :color, :require => :name)
+      before(:each) do
+        class Cow
+          def initialize(options)
+            magic_options(options, :only => :color, :require => :name)
+          end
         end
       end
 
