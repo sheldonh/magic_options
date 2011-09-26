@@ -37,6 +37,6 @@ Then /^an ArgumentError is raised$/ do
 end
 
 Then /^the error message is "(.+)"$/ do |error_message|
-  @exception.message.should == error_message
+  @exception.message.should include error_message
 end
 
