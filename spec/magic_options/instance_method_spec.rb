@@ -162,6 +162,53 @@ describe "MagicOptions#magic_options" do
 
     end
 
+    context "When Cow calls attr_accessor(:name)" do
+
+      before(:each) do
+        class Cow
+          attr_accessor :name
+        end
+      end
+
+      context "When Cow#initialize(options) calls magic_options(options, :only => :respond_to?)" do
+
+        before(:each) do
+          class Cow
+            def initialize(options)
+              magic_options options, :only => :respond_to?
+            end
+          end
+        end
+
+        context "Then Cow.new(:name => 'Daisy')" do
+
+          it "sets @name to 'Daisy'" do
+            @cow = Cow.new(:name => 'Daisy')
+            @cow.instance_variable_get('@name').should == 'Daisy'
+          end
+
+        end
+
+        context "Then Cow.new(:name => 'Daisy', :gender => :female)" do
+
+          it "raises an ArgumentError" do
+            lambda {
+              Cow.new(:name => 'Daisy', :gender => :female)
+            }.should raise_error(ArgumentError)
+          end
+
+          it "reports the offending class and the unknown option" do
+            lambda {
+              Cow.new(:name => 'Daisy', :gender => :female)
+            }.should raise_error("Unknown option gender in new Cow")
+          end
+
+        end
+
+      end
+
+    end
+
   end
 
 end
