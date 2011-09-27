@@ -109,6 +109,18 @@ Obtaining
 
 <https://github.com/sheldonh/magic_options>
 
+To install from rubygems.org:
+
+```
+gem install magic_options
+```
+
+To fetch the source from github.com:
+
+```
+git clone git://github.com/sheldonh/magic_options.git
+```
+
 Credits
 -------
 
