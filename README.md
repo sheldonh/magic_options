@@ -62,46 +62,26 @@ Professor.new :does_not_take => :anything
 Documentation
 -------------
 
-Working code first.  For now, here are the specs for the magic_options
-method:
+Working code first.  For now, here are the specs:
 
 ```
 MagicOptions#magic_options(options, config = {})
-  Given class Cow mixes in MagicOptions
-    When Cow#initialize(options) calls magic_options(options)
-      Then Cow.new(:name => 'Daisy', :color => :brown)
-        sets @name to 'Daisy'
-        sets @color to :brown
-    When Cow#initialize(options) calls magic_options(options, :only => [:name, :color])
-      Then Cow.new(:name => 'Daisy', :color => :brown)
-        sets @name to 'Daisy'
-        sets @color to :brown
-      Then Cow.new(:name => 'Daisy', :gender => :female)
-        raises an ArgumentError
-        reports the offending class and the unknown option
-    When Cow#initialize(options) calls magic_options(options, :require => :name)
-      Then Cow.new(:name => 'Daisy', :color => :brown)
-        sets @name to 'Daisy'
-        sets @color to :brown
-      Then Cow.new(:color => :brown)
-        raises an ArgumentError
-        reports the offending class and the missing option
-    When Cow#initialize(options) calls magic_options(options, :only => :color, :require => :name)
-      Then Cow.new(:name => 'Daisy', :color => :brown)
-        sets @name to 'Daisy'
-        sets @color to :brown
-      Then Cow.new(:color => :brown)
-        raises an ArgumentError
-        reports the offending class and the missing option
-```
+  sets instance variables named after keys in the options hash
+  sets instance variable values to the values in the options hash
+  accepts any option names without config[:only]
+  accepts option names included in config[:only]
+  raises ArgumentError for option names not included in config[:only]
+  accepts the absence of options without config[:require]
+  raises ArgumentError for absent option names in config[:require]
+  accepts option names in config[:require] even when they are not in config[:only]
+  raises ArgumentError for option names absent from both config[:only] and config[:require]
+  accepts option names that match instance method names if config[:only] is :respond_to?
+  raises ArgumentError for option names that match no instance method names if config[:only] is :respond_to?
 
-MagicOptions::ClassMethods#magic_initialize(config = {}) creates an
-initialize method that works like this:
-
-```ruby
-def initialize(options = {})
-  magic_options(options, config)
-end
+MagicOptions::ClassMethods#magic_initialize(config = {})
+  creates an initialize(options = {}) instance method
+  sets up initialize to pass through its options as magic_options' first argument
+  sets up initialize to pass the given config as magic_options's second argument
 ```
 
 Obtaining

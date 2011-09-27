@@ -1,205 +1,51 @@
 require File.join(File.dirname(__FILE__), '..', 'spec_helper')
+require 'magic_options'
 
-describe "MagicOptions::ClassMethods#magic_initialize" do
+describe "MagicOptions::ClassMethods#magic_initialize(config = {})" do
 
-  context "Given class Cow mixes in MagicOptions" do
+  before(:each) do
+    begin; Object.send(:remove_const, :Cow); rescue; end
+    class Cow
+      include MagicOptions
+    end
+  end
 
-    before(:each) do
-      require 'magic_options'
-      class Cow
-        include MagicOptions
+  it "creates an initialize(options = {}) instance method" do
+    class Cow
+      @@methods_added = []
+      def self.methods_added; @@methods_added; end
+      def self.method_added(method_name); @@methods_added << method_name; end
+      magic_initialize
+    end
+    Cow.methods_added.should include(:initialize)
+  end
+
+  it "sets up initialize to pass through its options as magic_options' first argument" do
+    class Cow
+      magic_initialize
+      attr_accessor :initialized_with_options
+      alias_method :real_initialize, :initialize
+      def initialize(options = {})
+        self.initialized_with_options = options
+        real_initialize(options)
       end
     end
+    cow = Cow.new(:name => 'Daisy')
+    cow.initialized_with_options.should == {:name => 'Daisy'}
+  end
 
-    context "When it calls magic_initialize" do
-
-      before(:each) do
-        class Cow
-          magic_initialize
-        end
+  it "sets up initialize to pass the given config as magic_options's second argument" do
+    class Cow
+      magic_initialize :only => :name
+      attr_accessor :magicked_with_config
+      alias_method :real_magic_options, :magic_options
+      def magic_options(options, config = {})
+        self.magicked_with_config = config
+        real_magic_options(options, config)
       end
-      
-      context "Then Cow.new(:name => 'Daisy', :color => :brown)" do
-
-        before(:each) do
-          @cow = Cow.new(:name => 'Daisy', :color => :brown)
-        end
-
-        it "sets @name to 'Daisy'" do
-          @cow.instance_variable_get('@name').should == 'Daisy'
-        end
-
-        it "sets @color to :brown" do
-          @cow.instance_variable_get('@color').should == :brown
-        end
-
-      end
-
     end
-
-    context "When it calls magic_initialize(:only => [:name, :color])" do
-
-      before(:each) do
-        class Cow
-          magic_initialize :only => [:name, :color]
-        end
-      end
-
-      context "Then Cow.new(:name => 'Daisy', :color => :brown)" do
-
-        before(:each) do
-          @cow = Cow.new(:name => 'Daisy', :color => :brown)
-        end
-
-        it "sets @name to 'Daisy'" do
-          @cow.instance_variable_get('@name').should == 'Daisy'
-        end
-
-        it "sets @color to :brown" do
-          @cow.instance_variable_get('@color').should == :brown
-        end
-
-      end
-
-      context "Then Cow.new(:name => 'Daisy', :gender => :female)" do
-
-        it "raises an ArgumentError" do
-          lambda {
-            Cow.new(:name => 'Daisy', :gender => :female)
-          }.should raise_error(ArgumentError)
-        end
-
-        it "reports the offending class and the unknown option" do
-          lambda {
-            Cow.new(:name => 'Daisy', :gender => :female)
-          }.should raise_error("Unknown option gender in new Cow")
-        end
-
-      end
-
-    end
-
-    context "When it calls magic_initialize(:require => :name)" do
-
-      before(:each) do
-        class Cow
-          magic_initialize :require => :name
-        end
-      end
-
-      context "Then Cow.new(:name => 'Daisy', :color => :brown)" do
-
-        before(:each) do
-          @cow = Cow.new(:name => 'Daisy', :color => :brown)
-        end
-
-        it "sets @name to 'Daisy'" do
-          @cow.instance_variable_get('@name').should == 'Daisy'
-        end
-
-        it "sets @color to :brown" do
-          @cow.instance_variable_get('@color').should == :brown
-        end
-
-      end
-
-      context "Then Cow.new(:color => :brown)" do
-
-        it "raises an ArgumentError" do
-          lambda { @cow = Cow.new(:color => :brown) }.should raise_error(ArgumentError)
-        end
-
-        it "reports the offending class and the missing option" do
-          lambda { @cow = Cow.new(:color => 'Daisy') }.should raise_error("Missing option name in new Cow")
-        end
-      end
-
-    end
-
-    context "When it calls magic_initialize(:only => :color, :require => :name)" do
-
-      before(:each) do
-        class Cow
-          magic_initialize :only => :color, :require => :name
-        end
-      end
-
-      context "Then Cow.new(:name => 'Daisy', :color => :brown)" do
-
-        before(:each) do
-          @cow = Cow.new(:name => 'Daisy', :color => :brown)
-        end
-
-        it "sets @name to 'Daisy'" do
-          @cow.instance_variable_get('@name').should == 'Daisy'
-        end
-
-        it "sets @color to :brown" do
-          @cow.instance_variable_get('@color').should == :brown
-        end
-
-      end
-
-      context "Then Cow.new(:color => :brown)" do
-
-        it "raises an ArgumentError" do
-          lambda { @cow = Cow.new(:color => :brown) }.should raise_error(ArgumentError)
-        end
-
-        it "reports the offending class and the missing option" do
-          lambda { @cow = Cow.new(:color => 'Daisy') }.should raise_error("Missing option name in new Cow")
-        end
-
-      end
-
-    end
-
-    context "When Cow calls attr_accessor(:name)" do
-
-      before(:each) do
-        class Cow
-          attr_accessor :name
-        end
-      end
-
-      context "When it calls magic_initialize(:only => :respond_to?)" do
-
-        before(:each) do
-          class Cow
-            magic_initialize :only => :respond_to?
-          end
-        end
-
-        context "Then Cow.new(:name => 'Daisy')" do
-
-          it "sets @name to 'Daisy'" do
-            @cow = Cow.new(:name => 'Daisy')
-            @cow.instance_variable_get('@name').should == 'Daisy'
-          end
-
-        end
-
-        context "Then Cow.new(:name => 'Daisy', :gender => :female)" do
-
-          it "raises an ArgumentError" do
-            lambda {
-              Cow.new(:name => 'Daisy', :gender => :female)
-            }.should raise_error(ArgumentError)
-          end
-
-          it "reports the offending class and the unknown option" do
-            lambda {
-              Cow.new(:name => 'Daisy', :gender => :female)
-            }.should raise_error("Unknown option gender in new Cow")
-          end
-
-        end
-
-      end
-
-    end
-
+    cow = Cow.new(:name => 'Daisy')
+    cow.magicked_with_config.should == {:only => :name}
   end
 
 end
-
