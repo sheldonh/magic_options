@@ -10,6 +10,14 @@ describe "MagicOptions::ClassMethods#magic_initialize(config = {})" do
     end
   end
 
+  it "creates an initialize(options = {}) instance method" do
+    Cow.should_receive(:method_added).with(:initialize)
+
+    class Cow
+      magic_initialize
+    end
+  end
+
   it "sets up initialize to pass through its options as magic_options' first argument" do
     class Cow
       magic_initialize
@@ -25,9 +33,9 @@ describe "MagicOptions::ClassMethods#magic_initialize(config = {})" do
       magic_initialize :only => :name
     end
 
-    Cow.any_instance.should_receive(:magic_options).with({:name => "Daisy"}, { :only => :name })
+    Cow.any_instance.should_receive(:magic_options).with({}, { :only => :name })
 
-    cow = Cow.new(:name => 'Daisy')
+    cow = Cow.new
   end
 
 end
