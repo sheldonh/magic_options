@@ -2,9 +2,9 @@ magic_options
 -------------
 
 MagicOptions is a ruby module that provides mechanisms for splatting
-an options hash into an object's instance variables.  Each key is taken
-as the name of an instance variable, to which the associated value is
-assigned.
+an options hash into an object's instance variables, typically during
+object initialization.  Each key is taken as the name of an instance
+variable, to which the associated value is assigned.
 
 Version 1.0.0 broke compatibility with previous versions, in the
 interests of being useful in subclasses and in initializers that take
@@ -59,31 +59,6 @@ Professor.new :does_not_take => :anything
  => ArgumentError: Unknown option does_not_take for new Professor
 ```
 
-Documentation
--------------
-
-Working code first.  For now, here are the specs:
-
-```
-MagicOptions#magic_options(options, config = {})
-  sets instance variables named after keys in the options hash
-  sets instance variable values to the values in the options hash
-  accepts any option names without config[:only]
-  accepts option names included in config[:only]
-  raises ArgumentError for option names not included in config[:only]
-  accepts the absence of options without config[:require]
-  raises ArgumentError for absent option names in config[:require]
-  accepts option names in config[:require] even when they are not in config[:only]
-  raises ArgumentError for option names absent from both config[:only] and config[:require]
-  accepts option names that match instance method names if config[:only] is :respond_to?
-  raises ArgumentError for option names that match no instance method names if config[:only] is :respond_to?
-
-MagicOptions::ClassMethods#magic_initialize(config = {})
-  creates an initialize(options = {}) instance method
-  sets up initialize to pass through its options as magic_options' first argument
-  sets up initialize to pass the given config as magic_options's second argument
-```
-
 Obtaining
 ---------
 
@@ -104,7 +79,7 @@ git clone git://github.com/sheldonh/magic_options.git
 Credits
 -------
 
-Pair programmed with [@rorymckinley][c1]
+Written in colaboration with [@rorymckinley][c1]
 
 [c1]: http://twitter.com/#!/rorymckinley
 
