@@ -13,7 +13,6 @@ more than just an options hash.
 
 The simplest approach is to use MagicOptions::ClassMethods#magic_initialize:
 
-<tt>
   require 'rubygems'
   require 'magic_options'
 
@@ -27,11 +26,9 @@ The simplest approach is to use MagicOptions::ClassMethods#magic_initialize:
 
   Gullible.new :accepts => "anything"
   # => #<Gullible:0x7f77e407fdb0 @accepts="anything">
-</tt>
 
 If you want an +ArgumentError+ for options that don't have accessors:
 
-<tt>
   class Cow
 
     include MagicOptions
@@ -46,14 +43,12 @@ If you want an +ArgumentError+ for options that don't have accessors:
   # => #<Cow:0x7f77e409a6d8 @gender="female", @color="brown">
   Cow.new :color => "brown", :gender => "female", :wheels => 4
   # => ArgumentError: Unknown option wheels for new Cow
-</tt>
 
 If your object initializer must do more than apply the magic options pattern,
 you can use MagicOptions#magic_options inside your +initialize+ method. This
 example also illustrates a more explicit method of specifying which options
 are allowed:
 
-<tt>
   class Professor < Staff
 
     include MagicOptions
@@ -68,21 +63,16 @@ are allowed:
   # => #<Professor:0x7f77e406d980 @hair_style=:einsteinian>
   Professor.new :does_not_take => :anything
   # => ArgumentError: Unknown option does_not_take for new Professor
-</tt>
 
 == Obtaining
 
 To install from rubygems.org:
 
-<tt>
   gem install magic_options
-</tt>
 
 To fetch the source from github.com:
 
-<tt>
   git clone git://github.com/sheldonh/magic_options.git
-</tt>
 
 == Credits
 
