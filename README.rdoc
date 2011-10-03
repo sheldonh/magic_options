@@ -1,68 +1,145 @@
 = magic_options
 
-MagicOptions is a ruby module that provides mechanisms for splatting
-an options hash into an object's instance variables, typically during
-object initialization.  Each key is taken as the name of an instance
-variable, to which the associated value is assigned.
+MagicOptions is an unobtrusive ruby module for splatting an options
+hash into an object's instance variables, typically during object
+initialization.  Each key is taken as the name of an instance variable,
+to which the associated value is assigned.
 
-Version 1.0.0 broke compatibility with previous versions, in the
-interests of being useful in subclasses and in initializers that take
-more than just an options hash.
+If you'd like to program defensively, there are additional options for
+specifying how options are ignored or required.
+
+Version 2.0.0 broke compatibility with previous versions, in the interests
+of ignoring unexpected options by default.  An exception can still be
+raised by setting the +:strict+ config option.
+
+Version 1.0.0 broke compatibility with previous versions, in the interests
+of being useful in subclasses and in initializers that take more than
+just an options hash.
 
 == Examples
 
-The simplest approach is to use MagicOptions::ClassMethods#magic_initialize:
+You know the drill:
+
+  class BigThing
+    def initialize(options = {})
+      @height   = options[:height]
+      @width    = options[:width]
+      @depth    = options[:depth]
+      @weight   = options[:weight]
+      @location = options[:location]
+    end
+  end
+
+What an epic yawn.
+
+With MagicOptions::ClassMethods#magic_initialize, you can just do this:
 
   require 'rubygems'
   require 'magic_options'
 
-  class Gullible
-
+  class BigThing
     include MagicOptions
 
     magic_initialize
-
   end
 
-  Gullible.new :accepts => "anything"
-  # => #<Gullible:0x7f77e407fdb0 @accepts="anything">
+If you need to do other stuff in your instance initializer, you can use
+MagicOptions#magic_options instead:
 
-If you want an +ArgumentError+ for options that don't have accessors:
-
-  class Cow
-
+  class BigThing
     include MagicOptions
 
-    magic_initialize :only => :respond_to?, :strict => true
-
-    attr_accessor :color, :gender
-
-  end
-
-  Cow.new :color => "brown", :gender => "female"
-  # => #<Cow:0x7f77e409a6d8 @gender="female", @color="brown">
-  Cow.new :color => "brown", :gender => "female", :wheels => 4
-  # => ArgumentError: Unknown option wheels for new Cow
-
-If your object initializer must do more than apply the magic options pattern,
-you can use MagicOptions#magic_options inside your +initialize+ method. This
-example also illustrates a more explicit method of specifying which options
-are accepted:
-
-  class Professor < Staff
-
-    include MagicOptions
-
-    def initialize(name, options = {})
-      magic_options options, :only => [:iq, :hairstyle]
+    def initialize(options = {})
+      magic_options options
+      @volume = (@height || 0) * (@width || 0) * (@depth || 0)
     end
-
   end
 
-  Professor.new :hair_style => :einsteinian
-  # => #<Professor:0x7f77e406d980 @hair_style=:einsteinian>
-  Professor.new :does_not_take => :anything
-  # => #<Professor:0x00000001bdc030>
+Of course, that code would suck less if some of those options were
+required:
+
+  class BigThing
+    include MagicOptions
+
+    def initialize(options = {})
+      magic_options options, :require => [:height, :width, :depth]
+      @volume = @height * @width * @depth
+    end
+  end
+
+What if we know our options hash is going to contain a load of crap that
+we don't want splatted into our instance variables?  Well, someone's
+being lazy but that happens:
+
+  class BigThing
+    include MagicOptions
+
+    def initialize({})
+      magic_options options, :require => [:height, :width, :depth],
+                             :only    => [:weight, :location]
+      @volume = @height * @width * @depth
+    end
+  end
+
+If +:only+ is specified, options that aren't in +:only+ or +:require+
+are ignored.
+
+But what if our caller needs an exception raised when unexpected options
+are given, the way she already gets an exception if required options are
+missing?  Boy, we sure have strayed into defensive programming territory:
+
+  class BigThing
+    include MagicOptions
+
+    def initialize({})
+      magic_options options, :require => [:height, :width, :depth],
+                             :only    => [:weight, :location],
+                             :strict  => true
+      @volume = @height * @width * @depth
+    end
+  end
+
+Note that MagicOptions::ClassMethods#magic_initialize takes the same
+config options as MagicOptions#magic_options, so you could have written
+that class like this:
+
+  class BigThing
+    include MagicOptions
+
+    magic_initialize :require => [:height, :width, :depth],
+                     :only    => [:weight, :location],
+                     :strict  => true
+
+    def volume
+      @volume ||= @height * @width * @depth
+    end
+  end
+
+Actually, if we're going to get all cute with accessors, we might as
+well just go all the way:
+
+  class BigThing
+    include MagicOptions
+
+    magic_initialize :require => [:height, :width, :depth],
+                     :only    => :respond_to?
+
+    attr_reader :height, :width, :depth, :weight, :location
+
+    def volume
+      @volume ||= @height * @width * @depth
+    end
+  end
+
+In that last example, an option for +:weight+ is still accepted, because
+the object responds to a method of the same name. Notice that +:strict+
+was left out. It could have been used, but the lazy +:respond_to?+ limit
+seems weird to use with +:strict+.  If you're so paranoid that you were
+willing to raise an exception over unexpected options, do you really want
+to accept _any_ option that matches an instance method name on the object?
+
+Defensive programming is a rabbit hole. You write your tests, let them
+write theirs.
 
 == Obtaining
 
