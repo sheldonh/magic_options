@@ -33,7 +33,7 @@ If you want an +ArgumentError+ for options that don't have accessors:
 
     include MagicOptions
 
-    magic_initialize :only => :respond_to?
+    magic_initialize :only => :respond_to?, :strict => true
 
     attr_accessor :color, :gender
 
@@ -47,7 +47,7 @@ If you want an +ArgumentError+ for options that don't have accessors:
 If your object initializer must do more than apply the magic options pattern,
 you can use MagicOptions#magic_options inside your +initialize+ method. This
 example also illustrates a more explicit method of specifying which options
-are allowed:
+are accepted:
 
   class Professor < Staff
 
@@ -62,7 +62,7 @@ are allowed:
   Professor.new :hair_style => :einsteinian
   # => #<Professor:0x7f77e406d980 @hair_style=:einsteinian>
   Professor.new :does_not_take => :anything
-  # => ArgumentError: Unknown option does_not_take for new Professor
+  # => #<Professor:0x00000001bdc030>
 
 == Obtaining
 
