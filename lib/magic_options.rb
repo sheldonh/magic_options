@@ -1,26 +1,11 @@
 require "magic_options/version"
 
-# MagicOptions is a ruby module that provides mechanisms for splatting
-# an options hash into an object's instance variables, typically during
-# object initialization.  Each key is taken as the name of an instance
-# variable, to which the associated value is assigned.
+# MagicOptions is an unobtrusive ruby module for splatting an options
+# hash into an object's instance variables, typically during object
+# initialization.  Each key is taken as the name of an instance variable,
+# to which the associated value is assigned.
 #
-# For example:
-#
-# <tt>
-#   class Cow
-#     def initialize(name, options = {})
-#       @name = name.capitalize
-#       @color = color
-#       @gender = gender
-#     end
-#   end
-#
-#   Cow.new('Daisy', :color => 'brown', :gender => 'female')
-#   # => #<Cow:0x000000015d02b8 @color="brown", @gender="female", @name="Daisy">
-# </tt>
-#
-# Here's how the same object initializer might be defined with MagicOptions:
+# The following code demonstrates the #magic_options instance method:
 #
 # <tt>
 #   class Cow
@@ -28,13 +13,16 @@ require "magic_options/version"
 #
 #     def initialize(name, options = {})
 #       @name = name.capitalize
-#       magic_options(options, :only => [:color, :gender])
+#       magic_options options, :only => [:color, :gender]
 #     end
 #   end
+#
+#   Cow.new('Daisy', :color => 'brown', :gender => 'female', :some => 'rubbish')
+#   # => #<Cow:0x000000015d02b8 @color="brown", @gender="female", @name="Daisy">
 # </tt>
 #
-# If your initialize method does nothing other than implement the magic options pattern,
-# you can let MagicOptions::ClassMethods#magic_initialize define it for you instead.
+# If the +initialize+ method need do nothing more than handle magic options, it
+# may be defined with MagicOptions::ClassMethods#magic_initialize instead.
 #
 module MagicOptions
 
@@ -46,8 +34,7 @@ module MagicOptions
   #   are assigned if they name a method on the instance.
   #
   # [+:require+]
-  #   Specify options that must be passed.  Options specified in +:require+ do not also need to be
-  #   specified in +:only+.
+  #   Specify options that must be passed.  Options specified in +:require+ do not need to be included in :+only+.
   #
   # [+:strict+]
   #   Specify that an +ArgumentError+ should be raised instead of ignoring unexpected options.  Defaults to false.
@@ -67,21 +54,21 @@ module MagicOptions
     base.extend(ClassMethods)
   end
 
-  # When an object initializer need do nothing more than implement the magic options pattern,
+  # When an object initializer need do nothing more than handle magic options,
   # it can be defined in terms of its magic options as follows:
   #
   # <tt>
   #   class Cow
   #     include MagicOptions
-  #     magic_initialize(:require => :name, :only => [:color, :gender])
+  #     magic_initialize :require => :name, :only => [:color, :gender]
   #   end
   #
   #   Cow.new(:name => 'Daisy', :color => 'brown', :gender => 'female')
   #   # => #<Cow:0x000000015d02b8 @color="brown", @gender="female", @name="Daisy">
   # </tt>
   #
-  # When the object initializer must do more than this (for example, if it must call +super+),
-  # you can define it yourself in terms of MagicOptions#magic_options.
+  # If the +initialize+ method must be defined to handle other responsibilities,
+  # magic options may be handled with MagicOptions#magic_options instead.
   #
   module ClassMethods
 
@@ -92,6 +79,15 @@ module MagicOptions
 
     # Defines an object initializer that takes an options hash and passes it to
     # MagicOptions#magic_options, along with the optional +config+ hash.
+    #
+    # This has the same effect as the following code:
+    #
+    # <tt>
+    #   def initialize(options = {})
+    #     magic_options(options, self.class.magic_options_config)
+    #   end
+    # </tt>
+    #
     def magic_initialize(config = {})
       self.magic_options_config = config
       class_eval %{
